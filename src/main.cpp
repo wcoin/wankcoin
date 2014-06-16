@@ -2765,6 +2765,12 @@ void SetGenesisHash() {
         block.nBits    = 0x1d00ffff;
         block.nNonce   = 2083236893;
 
+        if (fTestNet)
+        {
+            block.nTime    = 1296688602;
+            block.nNonce   = 414098458;
+        }
+        
         //// debug print
         uint256 hash = block.GetHash();
         hashGenesisBlock = hash;
