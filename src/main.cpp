@@ -1148,7 +1148,7 @@ unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast, const CBl
     {
         retargetTimespan = nTargetTimespanRe;
         retargetSpacing = nTargetSpacingRe;
-        retargetInterval = nTargetIntervalRe;
+        retargetInterval = nIntervalRe;
     }
 
     // Only change once per interval
