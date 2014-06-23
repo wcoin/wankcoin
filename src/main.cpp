@@ -1197,7 +1197,7 @@ unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast, const CBl
         printf("GetNextWorkRequired nActualTimespan Limiting\n");
 
         // amplitude filter - thanks to daft27 for this code
-        //nActualTimespan = retargetTimespan + (nActualTimespan - retargetTimespan)/8;
+        nActualTimespan = retargetTimespan + (nActualTimespan - retargetTimespan)/8;
 
         if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) 
             nActualTimespan = (retargetTimespan - (retargetTimespan/4));
