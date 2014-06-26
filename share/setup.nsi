@@ -77,6 +77,11 @@ Section -Main SEC0000
     SetOutPath $INSTDIR
     WriteRegStr HKCU "${REGKEY}\Components" Main 1
 
+    # Do we need a conf file?
+    SetOutPath $APPDATA\Wankcoin
+    SetOverwrite off
+    File wankcoin.conf
+
     # Remove old wxwidgets-based-wankcoin executable and locales:
     Delete /REBOOTOK $INSTDIR\wankcoin.exe
     RMDir /r /REBOOTOK $INSTDIR\locale
