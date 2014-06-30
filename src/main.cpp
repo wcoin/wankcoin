@@ -1093,7 +1093,6 @@ static const int64 nIntervalRe = nTargetTimespanRe / nTargetSpacingRe; // 1 bloc
 // Blocks that DigiShield will take affect at
 static const int64 nDiffChangeTargetTest = 25; // Patch effective @ block 25 on testnet
 static const int64 nDiffChangeTarget = 45000; // Patch effective @ block 45000
-static int lastKnownHeight = 0; // to reduce duplicate debug output from DigiShield change
 
 //
 // minimum amount of work that could possibly be required nTime after
@@ -1136,7 +1135,6 @@ unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast, const CBl
 
     int nHeight = pindexLast->nHeight + 1;
     bool fNewDifficultyProtocol = ((fTestNet && nHeight >= nDiffChangeTargetTest) || (!fTestNet && nHeight >= nDiffChangeTarget));
-    bool outputDebug = (!fNewDifficultyProtocol || (lastKnownHeight < nHeight));
     
     int64 retargetTimespan = nTargetTimespan;
     int64 retargetSpacing = nTargetSpacing;
@@ -1192,13 +1190,11 @@ unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast, const CBl
 
     // Limit adjustment step
     int64 nActualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
-    if (outputDebug)
-        printf("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
+    printf("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
 
     if (fNewDifficultyProtocol) // DigiShield implementation - thanks to RealSolid & WDC for this code
     {
-        if (outputDebug)
-            printf("GetNextWorkRequired nActualTimespan Limiting\n");
+        printf("GetNextWorkRequired nActualTimespan Limiting\n");
 
         // amplitude filter - thanks to daft27 for this code
         nActualTimespan = retargetTimespan + (nActualTimespan - retargetTimespan)/8;
@@ -1225,16 +1221,11 @@ unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast, const CBl
     if (bnNew > bnProofOfWorkLimit)
         bnNew = bnProofOfWorkLimit;
 
-    if (outputDebug)
-    {
-        /// debug print
-        printf("GetNextWorkRequired RETARGET\n");
-        printf("nTargetTimespan = %"PRI64d"    nActualTimespan = %"PRI64d"\n", nTargetTimespan, nActualTimespan);
-        printf("Before: %08x  %s\n", pindexLast->nBits, CBigNum().SetCompact(pindexLast->nBits).getuint256().ToString().c_str());
-        printf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString().c_str());
-    }
-    
-    lastKnownHeight = nHeight;
+    /// debug print
+    printf("GetNextWorkRequired RETARGET\n");
+    printf("nTargetTimespan = %"PRI64d"    nActualTimespan = %"PRI64d"\n", nTargetTimespan, nActualTimespan);
+    printf("Before: %08x  %s\n", pindexLast->nBits, CBigNum().SetCompact(pindexLast->nBits).getuint256().ToString().c_str());
+    printf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString().c_str());
 
     return bnNew.GetCompact();
 }
