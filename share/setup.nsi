@@ -5,7 +5,7 @@ SetCompressor /SOLID lzma
 
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\$(^Name)"
-!define VERSION 0.8.7
+!define VERSION 0.8.6
 !define COMPANY "Wankcoin project"
 !define URL http://www.wankcoin.com/
 
@@ -45,13 +45,13 @@ Var StartMenuGroup
 !insertmacro MUI_LANGUAGE English
 
 # Installer attributes
-OutFile wankcoin-0.8.7-win32-setup.exe
+OutFile wankcoin-0.8.6-win32-setup.exe
 InstallDir $PROGRAMFILES\Wankcoin
 CRCCheck on
 XPStyle on
 BrandingText " "
 ShowInstDetails show
-VIProductVersion 0.8.7.0
+VIProductVersion 0.8.6.0
 VIAddVersionKey ProductName Wankcoin
 VIAddVersionKey ProductVersion "${VERSION}"
 VIAddVersionKey CompanyName "${COMPANY}"
