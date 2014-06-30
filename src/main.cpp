@@ -1082,15 +1082,11 @@ int64 static GetBlockValue(int nHeight, int64 nFees)
 }
 
 static const int64 nTargetTimespan = 14 * 24 * 60 * 60; // two weeks
-static const int64 nTargetSpacing = 10 * 60; // 10 minutes
+static const int64 nTargetSpacing = 10 * 60;
 static const int64 nInterval = nTargetTimespan / nTargetSpacing;
 
 // Changes to implement DigiShield
-static const int64 nTargetTimespanRe = 10 * 60; // 10 minutes
-static const int64 nTargetSpacingRe = 10 * 60; // 10 minutes
-static const int64 nIntervalRe = nTargetTimespanRe / nTargetSpacingRe; // 1 block
-
-// Blocks that DigiShield will take affect at
+static const int64 nTargetTimespanNEW = 60 ; // every 1 minute
 static const int64 nDiffChangeTargetTest = 25; // Patch effective @ block 25 on testnet
 static const int64 nDiffChangeTarget = 45000; // Patch effective @ block 45000
 
@@ -1121,7 +1117,7 @@ unsigned int ComputeMinWork(unsigned int nBase, int64 nTime)
             // Maximum 10% adjustment...
             bnResult = (bnResult * 110) / 100;
             // ... in best-case exactly 4-times-normal target time
-            nTime -= nTargetTimespanRe*4;
+            nTime -= nTargetTimespanNEW*4;
         }
     }
     if (bnResult > bnProofOfWorkLimit)
@@ -1140,16 +1136,15 @@ unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast, const CBl
     int64 retargetSpacing = nTargetSpacing;
     int64 retargetInterval = nInterval;
     
+    if (fNewDifficultyProtocol) 
+    {
+        retargetInterval = nTargetTimespanNEW / nTargetSpacing;
+        retargetTimespan = nTargetTimespanNEW;
+    }
+
     // Genesis block
     if (pindexLast == NULL)
         return nProofOfWorkLimit;
-
-    if (fNewDifficultyProtocol) 
-    {
-        retargetTimespan = nTargetTimespanRe;
-        retargetSpacing = nTargetSpacingRe;
-        retargetInterval = nTargetIntervalRe;
-    }
 
     // Only change once per interval
     if ((pindexLast->nHeight+1) % retargetInterval != 0)
@@ -1194,29 +1189,27 @@ unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast, const CBl
 
     if (fNewDifficultyProtocol) // DigiShield implementation - thanks to RealSolid & WDC for this code
     {
-        printf("GetNextWorkRequired nActualTimespan Limiting\n");
+        printf("DIGISHIELD RETARGET\n");
 
         // amplitude filter - thanks to daft27 for this code
-        //nActualTimespan = retargetTimespan + (nActualTimespan - retargetTimespan)/8;
+        nActualTimespan = retargetTimespan + (nActualTimespan - retargetTimespan)/8;
 
-        if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) 
-            nActualTimespan = (retargetTimespan - (retargetTimespan/4));
-        if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) 
-            nActualTimespan = (retargetTimespan + (retargetTimespan/2));
+        if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) nActualTimespan = (retargetTimespan - (retargetTimespan/4));
+        if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) nActualTimespan = (retargetTimespan + (retargetTimespan/2));
     }
     else
     {
-        if (nActualTimespan < retargetTimespan/4)
-            nActualTimespan = retargetTimespan/4;
-        if (nActualTimespan > retargetTimespan*4)
-            nActualTimespan = retargetTimespan*4;
+        if (nActualTimespan < nTargetTimespan/4)
+            nActualTimespan = nTargetTimespan/4;
+        if (nActualTimespan > nTargetTimespan*4)
+            nActualTimespan = nTargetTimespan*4;
     }
 
     // Retarget
     CBigNum bnNew;
     bnNew.SetCompact(pindexLast->nBits);
     bnNew *= nActualTimespan;
-    bnNew /= retargetTimespan;
+    bnNew /= nTargetTimespan;
 
     if (bnNew > bnProofOfWorkLimit)
         bnNew = bnProofOfWorkLimit;
