@@ -1088,7 +1088,7 @@ static const int64 nInterval = nTargetTimespan / nTargetSpacing;
 // Changes to implement DigiShield
 static const int64 nTargetTimespanNEW = 60 ; // every 1 minute
 static const int64 nDiffChangeTargetTest = 25; // Patch effective @ block 25 on testnet
-static const int64 nDiffChangeTarget = 45000; // Patch effective @ block 45000
+static const int64 nDiffChangeTarget = 43000; // Patch effective @ block 43000
 
 //
 // minimum amount of work that could possibly be required nTime after
@@ -2811,12 +2811,6 @@ void SetGenesisHash() {
         block.nTime    = 1389218757;
         block.nBits    = 0x1d00ffff;
         block.nNonce   = 2083236893;
-
-        if (fTestNet)
-        {
-            block.nTime    = 1296688602;
-            block.nNonce   = 414098458;
-        }
 
         //// debug print
         uint256 hash = block.GetHash();
