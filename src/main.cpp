@@ -1092,7 +1092,7 @@ static const int64 nIntervalRe = nTargetTimespanRe / nTargetSpacingRe; // 1 bloc
 
 // Blocks that DigiShield will take affect at
 static const int64 nDiffChangeTargetTest = 25; // Patch effective @ block 25 on testnet
-static const int64 nDiffChangeTarget = 50000; // Patch effective @ block 50000
+static const int64 nDiffChangeTarget = 48000; // Patch effective @ block 48000
 static int lastKnownHeight = 0; // to reduce duplicate debug output from DigiShield change
 
 //
