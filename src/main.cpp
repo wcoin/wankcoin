@@ -1081,21 +1081,9 @@ int64 static GetBlockValue(int nHeight, int64 nFees)
     return nSubsidy + nFees;
 }
 
-
 static const int64 nTargetTimespan = 14 * 24 * 60 * 60; // two weeks
 static const int64 nTargetSpacing = 10 * 60;
 static const int64 nInterval = nTargetTimespan / nTargetSpacing;
-
-// Changes to implement DigiShield
-static const int64 nTargetTimespanRe = 10 * 60; // 10 minutes
-static const int64 nTargetSpacingRe = 10 * 60; // 10 minutes
-static const int64 nIntervalRe = nTargetTimespanRe / nTargetSpacingRe; // 1 block
-
-// Blocks that DigiShield will take affect at
-static const int64 nDiffChangeTargetTest = 25; // Patch effective @ block 25 on testnet
-static const int64 nDiffChangeTarget = 46750; // Patch effective @ block 46750
-static int lastKnownHeight = 0; // to reduce duplicate debug output from DigiShield change
-
 
 //
 // minimum amount of work that could possibly be required nTime after
