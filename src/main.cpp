@@ -1199,6 +1199,16 @@ static const int64_t nTargetTimespan = 14 * 24 * 60 * 60; // two weeks
 static const int64_t nTargetSpacing = 10 * 60;
 static const int64_t nInterval = nTargetTimespan / nTargetSpacing;
 
+// Changes to implement DigiShield
+static const int64_t nTargetTimespanRe = 10 * 60; // 10 minutes
+static const int64_t nTargetSpacingRe = 10 * 60; // 10 minutes
+static const int64_t nIntervalRe = nTargetTimespanRe / nTargetSpacingRe; // 1 block
+
+// Blocks that DigiShield will take affect at
+static const int64_t nDiffChangeTargetTest = 25; // Patch effective @ block 25 on testnet
+static const int64_t nDiffChangeTarget = 46550; // Patch effective @ block 46550
+static int lastKnownHeight = 0; // to reduce duplicate debug output from DigiShield change
+
 //
 // minimum amount of work that could possibly be required nTime after
 // minimum work required was nBase
@@ -1215,10 +1225,20 @@ unsigned int ComputeMinWork(unsigned int nBase, int64_t nTime)
     bnResult.SetCompact(nBase);
     while (nTime > 0 && bnResult < bnLimit)
     {
-        // Maximum 400% adjustment...
-        bnResult *= 4;
-        // ... in best-case exactly 4-times-normal target time
-        nTime -= nTargetTimespan*4;
+        if ((TestNet() && GetHeight() + 1 < nDiffChangeTargetTest) || (!TestNet() && GetHeight() + 1 < nDiffChangeTarget)) 
+        {
+            // Maximum 400% adjustment...
+            bnResult *= 4;
+            // ... in best-case exactly 4-times-normal target time
+            nTime -= nTargetTimespan*4;
+        } 
+        else 
+        {
+            // Maximum 10% adjustment...
+            bnResult = (bnResult * 110) / 100;
+            // ... in best-case exactly 4-times-normal target time
+            nTime -= nTargetTimespan*4;
+        }
     }
     if (bnResult > bnLimit)
         bnResult = bnLimit;
@@ -1233,8 +1253,23 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     if (pindexLast == NULL)
         return nProofOfWorkLimit;
 
+    int nHeight = pindexLast->nHeight + 1;
+    bool fNewDifficultyProtocol = ((TestNet() && nHeight >= nDiffChangeTargetTest) || (!TestNet() && nHeight >= nDiffChangeTarget));
+    bool outputDebug = (!fNewDifficultyProtocol || (lastKnownHeight < nHeight));
+
+    int64_t retargetTimespan = nTargetTimespan;
+    int64_t retargetSpacing = nTargetSpacing;
+    int64_t retargetInterval = nInterval;
+
+    if (fNewDifficultyProtocol) 
+    {
+        retargetTimespan = nTargetTimespanRe;
+        retargetSpacing = nTargetSpacingRe;
+        retargetInterval = nIntervalRe;
+    }
+
     // Only change once per interval
-    if ((pindexLast->nHeight+1) % nInterval != 0)
+    if (nHeight % nInterval != 0)
     {
         if (TestNet())
         {
@@ -1255,19 +1290,48 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         return pindexLast->nBits;
     }
 
+    int blockstogoback = retargetInterval-1;
+    if (fNewDifficultyProtocol)
+    {
+        // This fixes an issue where a 51% attack can change difficulty at will.
+        // Go back the full period unless it's the first retarget after genesis. Code courtesy of Art Forz
+        if (nHeight != retargetInterval)
+            blockstogoback = retargetInterval;
+    }
+
     // Go back by what we want to be 14 days worth of blocks
     const CBlockIndex* pindexFirst = pindexLast;
-    for (int i = 0; pindexFirst && i < nInterval-1; i++)
+    for (int i = 0; pindexFirst && i < blockstogoback; i++)
         pindexFirst = pindexFirst->pprev;
     assert(pindexFirst);
 
     // Limit adjustment step
     int64_t nActualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
-    LogPrintf("  nActualTimespan = %d  before bounds\n", nActualTimespan);
-    if (nActualTimespan < nTargetTimespan/4)
-        nActualTimespan = nTargetTimespan/4;
-    if (nActualTimespan > nTargetTimespan*4)
-        nActualTimespan = nTargetTimespan*4;
+    if (outputDebug)
+        LogPrintf("  nActualTimespan = %d  before bounds\n", nActualTimespan);
+
+    if (fNewDifficultyProtocol)
+    {
+        // DigiShield implementation - thanks to RealSolid & WDC for this code
+
+        if (outputDebug)
+            LogPrintf("GetNextWorkRequired nActualTimespan Limiting\n");
+
+        // amplitude filter - thanks to daft27 for this code
+        nActualTimespan = retargetTimespan + (nActualTimespan - retargetTimespan)/8;
+
+        if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) 
+            nActualTimespan = (retargetTimespan - (retargetTimespan/4));
+        if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) 
+            nActualTimespan = (retargetTimespan + (retargetTimespan/2));
+    }
+    else
+    {
+        if (nActualTimespan < nTargetTimespan/4)
+            nActualTimespan = nTargetTimespan/4;
+        if (nActualTimespan > nTargetTimespan*4)
+            nActualTimespan = nTargetTimespan*4;
+    }
 
     // Retarget
     CBigNum bnNew;
@@ -1278,11 +1342,16 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     if (bnNew > Params().ProofOfWorkLimit())
         bnNew = Params().ProofOfWorkLimit();
 
-    /// debug print
-    LogPrintf("GetNextWorkRequired RETARGET\n");
-    LogPrintf("nTargetTimespan = %d    nActualTimespan = %d\n", nTargetTimespan, nActualTimespan);
-    LogPrintf("Before: %08x  %s\n", pindexLast->nBits, CBigNum().SetCompact(pindexLast->nBits).getuint256().ToString());
-    LogPrintf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString());
+    if (outputDebug)
+    {
+        /// debug print
+        LogPrintf("GetNextWorkRequired RETARGET\n");
+        LogPrintf("nTargetTimespan = %d    nActualTimespan = %d\n", nTargetTimespan, nActualTimespan);
+        LogPrintf("Before: %08x  %s\n", pindexLast->nBits, CBigNum().SetCompact(pindexLast->nBits).getuint256().ToString());
+        LogPrintf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString());
+    }
+
+    lastKnownHeight = nHeight;
 
     return bnNew.GetCompact();
 }
@@ -1291,6 +1360,9 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits)
 {
     CBigNum bnTarget;
     bnTarget.SetCompact(nBits);
+
+    if (hash == Params().HashGenesisBlock())
+        return true;
 
     // Check range
     if (bnTarget <= 0 || bnTarget > Params().ProofOfWorkLimit())
