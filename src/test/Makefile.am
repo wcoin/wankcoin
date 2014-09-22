@@ -2,9 +2,9 @@ include $(top_srcdir)/src/Makefile.include
 
 AM_CPPFLAGS += -I$(top_srcdir)/src
 
-bin_PROGRAMS = test_bitcoin
+bin_PROGRAMS = test_wankcoin
 
-TESTS = test_bitcoin
+TESTS = test_wankcoin
 
 JSON_TEST_FILES = \
   data/script_valid.json \

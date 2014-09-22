@@ -5,8 +5,8 @@ AM_CPPFLAGS += -I$(top_srcdir)/src \
   -I$(top_builddir)/src/qt \
   $(PROTOBUF_CFLAGS) \
     $(QR_CFLAGS)
-bin_PROGRAMS = test_bitcoin-qt
-TESTS = test_bitcoin-qt
+bin_PROGRAMS = test_wankcoin-qt
+TESTS = test_wankcoin-qt
 
 TEST_QT_MOC_CPP = moc_uritests.cpp
 
