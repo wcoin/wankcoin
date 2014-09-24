@@ -1207,7 +1207,7 @@ static const int64_t nIntervalRe = nTargetTimespanRe / nTargetSpacingRe; // 1 bl
 // Blocks that DigiShield will take affect at
 static const int64_t nDiffChangeTargetTest = 25; // Patch effective @ block 25 on testnet
 static const int64_t nDiffChangeTarget = 46550; // Patch effective @ block 46550
-static int lastKnownHeight = 0; // to reduce duplicate debug output from DigiShield change
+static int64_t lastKnownHeight = 0; // to reduce duplicate debug output from DigiShield change
 
 //
 // minimum amount of work that could possibly be required nTime after
@@ -1237,7 +1237,7 @@ unsigned int ComputeMinWork(unsigned int nBase, int64_t nTime)
             // Maximum 10% adjustment...
             bnResult = (bnResult * 110) / 100;
             // ... in best-case exactly 4-times-normal target time
-            nTime -= nTargetTimespan*4;
+            nTime -= nTargetTimespanRe*4;
         }
     }
     if (bnResult > bnLimit)
@@ -1253,7 +1253,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     if (pindexLast == NULL)
         return nProofOfWorkLimit;
 
-    int nHeight = pindexLast->nHeight + 1;
+    int64_t nHeight = pindexLast->nHeight + 1;
     bool fNewDifficultyProtocol = ((TestNet() && nHeight >= nDiffChangeTargetTest) || (!TestNet() && nHeight >= nDiffChangeTarget));
     bool outputDebug = (!fNewDifficultyProtocol || (lastKnownHeight < nHeight));
 
@@ -1269,7 +1269,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     }
 
     // Only change once per interval
-    if (nHeight % nInterval != 0)
+    if (nHeight % retargetInterval != 0)
     {
         if (TestNet())
         {
@@ -1282,7 +1282,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
             {
                 // Return the last non-special-min-difficulty-rules-block
                 const CBlockIndex* pindex = pindexLast;
-                while (pindex->pprev && pindex->nHeight % nInterval != 0 && pindex->nBits == nProofOfWorkLimit)
+                while (pindex->pprev && pindex->nHeight % retargetInterval != 0 && pindex->nBits == nProofOfWorkLimit)
                     pindex = pindex->pprev;
                 return pindex->nBits;
             }
@@ -1327,17 +1327,17 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     }
     else
     {
-        if (nActualTimespan < nTargetTimespan/4)
-            nActualTimespan = nTargetTimespan/4;
-        if (nActualTimespan > nTargetTimespan*4)
-            nActualTimespan = nTargetTimespan*4;
+        if (nActualTimespan < retargetTimespan/4)
+            nActualTimespan = retargetTimespan/4;
+        if (nActualTimespan > retargetTimespan*4)
+            nActualTimespan = retargetTimespan*4;
     }
 
     // Retarget
     CBigNum bnNew;
     bnNew.SetCompact(pindexLast->nBits);
     bnNew *= nActualTimespan;
-    bnNew /= nTargetTimespan;
+    bnNew /= retargetTimespan;
 
     if (bnNew > Params().ProofOfWorkLimit())
         bnNew = Params().ProofOfWorkLimit();
@@ -1346,7 +1346,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     {
         /// debug print
         LogPrintf("GetNextWorkRequired RETARGET\n");
-        LogPrintf("nTargetTimespan = %d    nActualTimespan = %d\n", nTargetTimespan, nActualTimespan);
+        LogPrintf("retargetTimespan = %d    nActualTimespan = %d\n", retargetTimespan, nActualTimespan);
         LogPrintf("Before: %08x  %s\n", pindexLast->nBits, CBigNum().SetCompact(pindexLast->nBits).getuint256().ToString());
         LogPrintf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString());
     }
