@@ -24,9 +24,9 @@ You need the Qt4 run-time libraries to run Wankcoin-Qt. On Debian or Ubuntu:
 
 Unpack the files into a directory and run:
 
-- bin/32/bitcoin-qt (GUI, 32-bit)
+- bin/32/wankcoin-qt (GUI, 32-bit)
 - bin/32/wankcoind (headless, 32-bit)
-- bin/64/bitcoin-qt (GUI, 64-bit)
+- bin/64/wankcoin-qt (GUI, 64-bit)
 - bin/64/wankcoind (headless, 64-bit)
 
 See the documentation at the [Bitcoin Wiki](https://en.bitcoin.it/wiki/Main_Page)
