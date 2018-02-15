@@ -2,7 +2,7 @@ Wankcoin integration/staging tree
 ================================
 
 Copyright (c) 2009-2013 Bitcoin Developers
-Copyright (c) 2014 Wankcoin Developers
+Copyright (c) 2014-2018 Wankcoin Developers
 
 What is Wankcoin?
 ----------------
@@ -43,7 +43,7 @@ Unit tests for the core code are in `src/test/`. To compile and run them:
 
 Unit tests for the GUI code are in `src/qt/test/`. To compile and run them:
 
-    qmake BITCOIN_QT_TEST=1 -o Makefile.test bitcoin-qt.pro
+    qmake BITCOIN_QT_TEST=1 -o Makefile.test wankcoin-qt.pro
     make -f Makefile.test
     ./wankcoin-qt_test
 
