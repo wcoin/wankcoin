@@ -29,7 +29,7 @@ To compile and run the tests:
 
 	qmake bitcoin-qt.pro BITCOIN_QT_TEST=1
 	make
-	./bitcoin-qt_test
+	./wankcoin-qt_test
 
 To add more tests, add them to the `src/qt/test/` directory,
 the `src/qt/test/test_main.cpp` file, and bitcoin-qt.pro.

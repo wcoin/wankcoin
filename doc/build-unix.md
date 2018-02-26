@@ -1,4 +1,5 @@
 Copyright (c) 2009-2013 Bitcoin Developers
+Copyright (c) 2014-2018 Wankcoin Developers
 
 Distributed under the MIT/X11 software license, see the accompanying
 file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -12,7 +13,7 @@ To Build
 ---------------------
 
 	cd src/
-	make -f makefile.unix		# Headless bitcoin
+	make -f makefile.unix		# Headless wankcoin
 
 See readme-qt.rst for instructions on building Wankcoin-Qt, the graphical user interface.
 
@@ -21,7 +22,7 @@ Dependencies
 
  Library     Purpose           Description
  -------     -------           -----------
- libssl      SSL Support       Secure communications
+ openssl     SSL Support       Secure communications
  libdb4.8    Berkeley DB       Blockchain & wallet storage
  libboost    Boost             C++ Library
  miniupnpc   UPnP Support      Optional firewall-jumping support
@@ -45,10 +46,10 @@ Licenses of statically linked libraries:
  miniupnpc     New (3-clause) BSD license
 
 - Versions used in this release:
--  GCC           4.3.3
--  OpenSSL       1.0.1c
+-  GCC           4.6.3
+-  OpenSSL       1.0.2n
 -  Berkeley DB   4.8.30.NC
--  Boost         1.37
+-  Boost         1.48
 -  miniupnpc     1.6
 
 Dependency Build Instructions: Ubuntu & Debian
@@ -56,13 +57,13 @@ Dependency Build Instructions: Ubuntu & Debian
 Build requirements:
 
 	sudo apt-get install build-essential
-	sudo apt-get install libssl-dev
 
 for Ubuntu 12.04:
 
 	sudo apt-get install libboost-all-dev
 
  db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).
+ db4.8 source is available [here](http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/downloads/index-082944.html).
 
  Ubuntu precise has packages for libdb5.1-dev and libdb5.1++-dev,
  but using these will break binary wallet compatibility, and is not recommended.
@@ -82,14 +83,14 @@ Optional:
 Dependency Build Instructions: Gentoo
 -------------------------------------
 
-Note: If you just want to install wankcoind on Gentoo, you can add the Bitcoin overlay and use your package manager:
+Note: If you just want to install wankcoind on Gentoo, you can add the Wankcoin overlay and use your package manager:
 
-	layman -a bitcoin && emerge wankcoind
+	layman -a wankcoin && emerge wankcoind
 	emerge -av1 --noreplace boost glib openssl sys-libs/db:4.8
 
 Take the following steps to build (no UPnP support):
 
-	cd ${BITCOIN_DIR}/src
+	cd ${WANKCOIN_DIR}/src
 	make -f makefile.unix USE_UPNP= USE_IPV6=1 BDB_INCLUDE_PATH='/usr/include/db4.8'
 	strip wankcoind
 
@@ -128,7 +129,7 @@ If you need to build Boost yourself:
 
 Security
 --------
-To help make your bitcoin installation more secure by making certain attacks impossible to
+To help make your wankcoin installation more secure by making certain attacks impossible to
 exploit even if a vulnerability is found, you can take the following measures:
 
 * Position Independent Executable
@@ -147,7 +148,7 @@ exploit even if a vulnerability is found, you can take the following measures:
 
     To test that you have built PIE executable, install scanelf, part of paxutils, and use:
 
-    	scanelf -e ./bitcoin
+    	scanelf -e ./wankcoin
 
     The output should contain:
      TYPE
@@ -155,13 +156,13 @@ exploit even if a vulnerability is found, you can take the following measures:
 
 * Non-executable Stack
     If the stack is executable then trivial stack based buffer overflow exploits are possible if
-    vulnerable buffers are found. By default, bitcoin should be built with a non-executable stack
+    vulnerable buffers are found. By default, wankcoin should be built with a non-executable stack
     but if one of the libraries it uses asks for an executable stack or someone makes a mistake
     and uses a compiler extension which requires an executable stack, it will silently build an
     executable without the non-executable stack protection.
 
     To verify that the stack is non-executable after compiling use:
-    `scanelf -e ./bitcoin`
+    `scanelf -e ./wankcoin`
 
     the output should contain:
 	STK/REL/PTL

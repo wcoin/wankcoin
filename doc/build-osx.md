@@ -12,7 +12,8 @@ Authors
 License
 -------
 
-Copyright (c) 2009-2012 Bitcoin Developers
+Copyright (c) 2009-2013 Bitcoin Developers
+Copyright (c) 2014-2018 Wankcoin Developers
 
 Distributed under the MIT/X11 software license, see the accompanying
 file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -76,7 +77,7 @@ Installing the dependencies using MacPorts is very straightforward.
 
 1. Clone the github tree to get the source code and go into the directory.
 
-        git clone git@github.com:bitcoin/bitcoin.git bitcoin
+        git clone git@github.com:wankcoin/wankcoin.git wankcoin
         cd bitcoin
 
 2.  Build wankcoind:
@@ -111,7 +112,7 @@ Rerunning "openssl version" should now return the correct version.
 
 1. Clone the github tree to get the source code and go into the directory.
 
-        git clone git@github.com:bitcoin/bitcoin.git bitcoin
+        git clone git@github.com:wankcoin/wankcoin.git wankcoin
         cd bitcoin
 
 2.  Modify source in order to pick up the `openssl` library.
@@ -172,8 +173,8 @@ directory. We have to first create the RPC configuration file, though.
 Run `./wankcoind` to get the filename where it should be put, or just try these
 commands:
 
-    echo -e "rpcuser=bitcoinrpc\nrpcpassword=$(xxd -l 16 -p /dev/urandom)" > "/Users/${USER}/Library/Application Support/Bitcoin/wankcoin.conf"
-    chmod 600 "/Users/${USER}/Library/Application Support/Bitcoin/wankcoin.conf"
+    echo -e "rpcuser=wankcoinrpc\nrpcpassword=$(xxd -l 16 -p /dev/urandom)" > "/Users/${USER}/Library/Application Support/Wankcoin/wankcoin.conf"
+    chmod 600 "/Users/${USER}/Library/Application Support/Wankcoin/wankcoin.conf"
 
 When next you run it, it will start downloading the blockchain, but it won't
 output anything while it's doing this. This process may take several hours.
@@ -181,5 +182,5 @@ output anything while it's doing this. This process may take several hours.
 Other commands:
 
     ./wankcoind --help  # for a list of command-line options.
-    ./wankcoind -daemon # to start the bitcoin daemon.
+    ./wankcoind -daemon # to start the wankcoin daemon.
     ./wankcoind help    # When the daemon is running, to get a list of RPC commands
